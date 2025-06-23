@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  mssql:
+    image: mcr.microsoft.com/azure-sql-edge
+    container_name: survey-db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Password123!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql   
+    restart: unless-stopped
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$$SA_PASSWORD" -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mssql-data:

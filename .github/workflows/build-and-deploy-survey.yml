@@ -1,0 +1,133 @@
+name: Build & Deploy Survey-App
+
+on:
+  workflow_dispatch:
+    inputs:
+      teamName:
+        description: "Team Name (IMPORTANT)"
+        default: "team7"
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+env:
+  REGISTRY: ghcr.io
+  LOC_CORE: westeurope
+  LOC_SQL:  northeurope
+
+jobs:
+  build_test_push_and_deploy_survey:
+    runs-on: ubuntu-22.04
+
+    steps:
+    # Setup
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 9 SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: "9.0.x"
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Cache dotnet tools
+      uses: actions/cache@v4
+      with:
+        path: ~/.dotnet/tools
+        key: ${{ runner.os }}-dotnet-tools-${{ hashFiles('**/global.json') }}
+
+    - name: Install dotnet-ef Tool
+      run: dotnet tool install --global dotnet-ef
+
+    - name: Add dotnet tools to PATH
+      run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+    # Build & Test Survey App
+    - name: Restore & Build Survey-App
+      working-directory: src/Survey-App
+      run: |
+        dotnet restore
+        dotnet build --no-restore --configuration Release
+
+    - name: Run Survey-Tests
+      working-directory: tests/Survey-Tests
+      run: dotnet test --verbosity normal
+
+    # Build & Push Survey Container App
+    - name: Lower-case the repo owner
+      shell: bash
+      run: echo "OWNER_LOWER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
+    - name: Log in to GHCR
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GHCR_PAT }}
+
+    - name: Build & Push Survey-App image
+      uses: docker/build-push-action@v6
+      with:
+        context: src/Survey-App
+        file: src/Survey-App/Dockerfile
+        push: true
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.OWNER_LOWER }}/survey-app-${{ github.event.inputs.teamName }}:${{ github.sha }}
+          ${{ env.REGISTRY }}/${{ env.OWNER_LOWER }}/survey-app-${{ github.event.inputs.teamName }}:${{ github.ref_name || github.head_ref }}
+        build-args: |
+          NUGET_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          USERNAME=${{ github.actor }}
+
+    #Provision Survey Container App
+    - name: Azure Login (service-principal)
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # Create team-rg if needed
+    - name: Ensure team RG
+      run: |
+        az group create \
+          --name rg-${{ github.event.inputs.teamName }}-apps \
+          --location $LOC_CORE
+
+    - name: Run EF Core Migrations
+      working-directory: src/Survey-App
+      env:
+        TEAM: ${{ github.event.inputs.teamName }}
+      run: |
+        dotnet ef database update --connection "Server=tcp:sqlsvr-${TEAM}.database.windows.net,1433;Initial Catalog=surveydb-${TEAM};User ID=dbadmin;Password=Password123!-${TEAM};Encrypt=True;Connection Timeout=30;"
+
+    # Deploy survey container app
+    - name: Deploy Survey Container App
+      env:
+        TEAM:         ${{ github.event.inputs.teamName }}
+        RG_TEAM:      rg-${{ github.event.inputs.teamName }}-apps
+        REGISTRY:     ${{ env.REGISTRY }}
+        OWNER_LOWER:  ${{ env.OWNER_LOWER }}
+        SHA:          ${{ github.sha }}
+      run: |
+        az deployment group create \
+          --resource-group $RG_TEAM \
+          --template-file ./Infrastructure/survey.bicep \
+          --parameters ./Infrastructure/survey.bicepparam \
+               teamName=$TEAM \
+               surveyImage=$REGISTRY/$OWNER_LOWER/survey-app-$TEAM:$SHA \
+               registryUsername=${{ github.actor }} 
+
+  # Execute workflow --> check for team function apps, add shared-uami --> grant access to team kv
+  assign_uami_to_functions:
+    needs: build_test_push_and_deploy_survey
+    uses: Kelag-Hackathon/team7/.github/workflows/setup-team-function-app.yml@main
+    with:
+      teamName: ${{ github.event.inputs.teamName }}
+    secrets: inherit

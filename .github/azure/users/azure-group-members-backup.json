@@ -1,0 +1,204 @@
+[
+  {
+    "group_name": "team5-contributor",
+    "users": [
+      {
+        "Id": "ef265088-de6a-469d-95f4-5192440848c1",
+        "UserPrincipalName": "benjamin.vosseler_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "5723938f-d1fa-49bf-836d-0b8fa49734dc",
+        "UserPrincipalName": "marcel.wurm_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "2fc50241-b68d-4612-8c42-6dfa4495c76d",
+        "UserPrincipalName": "nikolas.roshan_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "62a35364-d664-4dad-8fde-92bae47fee09",
+        "UserPrincipalName": "dane.berloznik_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      }
+    ]
+  },
+  {
+    "group_name": "team3-contributor",
+    "users": [
+      {
+        "Id": "e0f1a788-cccc-4ff7-90bf-7c31616c8380",
+        "UserPrincipalName": "maximilian.adler_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "940a0ab6-0e68-4d0e-a071-f9ca70f73800",
+        "UserPrincipalName": "anamaria.frank_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "6be8172f-bf57-4328-9534-f55310982553",
+        "UserPrincipalName": "stefan.ebner_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "6f6587bd-4028-4d90-8d2a-aa0e887dd7c4",
+        "UserPrincipalName": "leopold.klocker_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      }
+    ]
+  },
+  {
+    "group_name": "team10-contributor",
+    "users": [
+      {
+        "Id": "54401a4c-236a-419f-b080-a172f066698e",
+        "UserPrincipalName": "julius.ball_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "a7365794-64ac-4d41-b5e6-64a91a2ae5ee",
+        "UserPrincipalName": "philipp.borkovic_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "2de19724-4ef7-4a25-8036-b5913dc939f8",
+        "UserPrincipalName": "paul.gradischnig_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      }
+    ]
+  },
+  {
+    "group_name": "team7-contributor",
+    "users": [
+      {
+        "Id": "8f0de8f2-0a0d-424f-85f9-b4c0ec582077",
+        "UserPrincipalName": "maximilian.seirer_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "443f80d9-e8f4-49cf-b086-eecf1d2cd8c6",
+        "UserPrincipalName": "nedzad.sabuljic_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "2e9725cc-4a1e-45c5-9e49-b187db086806",
+        "UserPrincipalName": "luis.maturana-dorado_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "0d0a9ae7-56c2-4df5-ac37-c9aaacf99a30",
+        "UserPrincipalName": "lucas.dereani_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      }
+    ]
+  },
+  {
+    "group_name": "team8-contributor",
+    "users": [
+      {
+        "Id": "b4cfc9c9-af69-4324-af79-d64d415ccc97",
+        "UserPrincipalName": "manuel.lauchart_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "bb4e45f3-fceb-4c22-811d-3bd0c6aa474f",
+        "UserPrincipalName": "felix.palle_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "59e78331-6b34-4a73-8a51-3ebc78400730",
+        "UserPrincipalName": "jakob.painter_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      }
+    ]
+  },
+  {
+    "group_name": "team6-contributor",
+    "users": [
+      {
+        "Id": "806fb638-fcb8-45b7-8965-79aafc1e1443",
+        "UserPrincipalName": "noel.wutti_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "6bbfc0e5-ca84-4a6c-b229-df703859db77",
+        "UserPrincipalName": "carlotta.stauber_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "63748aaf-7357-4155-8776-05f7f10e4001",
+        "UserPrincipalName": "dominik.leitner_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "d67f896f-67d8-4e76-9ad2-bcf588fc3c14",
+        "UserPrincipalName": "martin.wetschnig_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      }
+    ]
+  },
+  {
+    "group_name": "team4-contributor",
+    "users": [
+      {
+        "Id": "8ecc9658-3d03-4f5a-adba-e10b527398b6",
+        "UserPrincipalName": "luis.blueml_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "2c79247c-afda-4f53-9442-9abd5abc82ab",
+        "UserPrincipalName": "felix.mairamhof_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "165018c2-06db-49b5-a240-1c81970c5e5c",
+        "UserPrincipalName": "jonah.strohmaier_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "fc0da655-8f53-494b-9bf2-9cd06aa1d207",
+        "UserPrincipalName": "daniel.scheriau_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      }
+    ]
+  },
+  {
+    "group_name": "team1-contributor",
+    "users": [
+      {
+        "Id": "f432b1c2-2ba6-4845-8793-aa09a199dc35",
+        "UserPrincipalName": "aarmbruckner_gmail.com#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "baf45829-505f-43ff-9e0b-ea423c8fb057",
+        "UserPrincipalName": "thomas.allesch_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "708f3956-5793-4bb5-b4fc-8d4888085991",
+        "UserPrincipalName": "melina.koppitsch_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "3ebf7b4b-b570-4d2e-b5e0-f1eb4fb65d14",
+        "UserPrincipalName": "lukas.haller_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "5f4302a0-2f99-44ef-903b-7bd56b3f3a8f",
+        "UserPrincipalName": "lukas.krusch_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      }
+    ]
+  },
+  {
+    "group_name": "team2-contributor",
+    "users": [
+      {
+        "Id": "61a55fa9-be34-428a-a974-dcc4ba791f80",
+        "UserPrincipalName": "michael.hammer_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "3a79b819-c382-46e4-a269-35f54f389c16",
+        "UserPrincipalName": "thiemo.may_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "3a02a850-244a-461f-becd-d91211c16a74",
+        "UserPrincipalName": "jonas.stefan_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "896e5ef9-2a40-4c99-bec9-66f9cc3e09c3",
+        "UserPrincipalName": "ferdinand.gebenetter_edu.htl-klu.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      }
+    ]
+  },
+  {
+    "group_name": "team9-contributor",
+    "users": [
+      {
+        "Id": "c08a177d-bbc3-4298-b86f-fbf2a1c069a2",
+        "UserPrincipalName": "v.tran_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "93a1a094-27ed-4c7c-b58f-d7d5aa21921d",
+        "UserPrincipalName": "nikolaj.wrienz_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      },
+      {
+        "Id": "27d8a3f2-7e4c-4faf-99df-5d1e64e2affa",
+        "UserPrincipalName": "maximilian.dlobst_edu.htl-villach.at#EXT#@hackathonkelag2025.onmicrosoft.com"
+      }
+    ]
+  }
+]

@@ -1,0 +1,24 @@
+# Ignore build artifacts
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.vs/
+.vscode/
+
+# Git metadata
+.git
+.gitignore
+
+# Logs, caches, temp files
+*.log
+*.cache
+
+# Dockerfiles and compose files themselves (not needed inside image)
+Dockerfile*
+docker-compose*
+
+# README, docs, tests (optional)
+*.md
