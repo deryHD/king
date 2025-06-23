@@ -1,6 +1,6 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Reporting-App</a>
+        <a class="navbar-brand" href="">NPS Intelligence</a>
     </div>
 </div>
 
@@ -10,9 +10,19 @@
     <nav class="nav flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Dashboard
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="report">
+                <span class="bi bi-graph-up-nav-menu" aria-hidden="true"></span> Reports
             </NavLink>
         </div>
     </nav>
 </div>
 
+<style>
+    .bi-graph-up-nav-menu {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-graph-up' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M0 0h1v15h15v1H0V0Zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .704-.07Z'/%3E%3C/svg%3E");
+    }
+</style>
