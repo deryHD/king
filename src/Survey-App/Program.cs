@@ -2,6 +2,7 @@ using Survey_App.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using SurveyApp.Database;
+using SurveyApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,11 +16,16 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Register custom services
+builder.Services.AddHttpClient<IOpenAiService, OpenAiService>();
+builder.Services.AddScoped<ISurveyService, SurveyService>();
+
+// Add logging
+builder.Services.AddLogging();
+
 var app = builder.Build();
 
-//test
-
-// 6) HTTP-Pipeline konfigurieren
+// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
@@ -34,9 +40,7 @@ else
     }
 }
 
-
-
-    app.UseAntiforgery();
+app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

@@ -1,7 +1,314 @@
 @page "/survey"
+@page "/survey/{token}"
+@using SurveyApp.Services
+@using SurveyApp.Database.Entities
+@inject ISurveyService SurveyService
+@inject IJSRuntime JSRuntime
+@inject ILogger<Survey> Logger
 
-<PageTitle>Survey</PageTitle>
+<PageTitle>NPS Umfrage</PageTitle>
 
-<h1>Hello, and welcome to the Survey-App</h1>
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-light">
+    <div class="card shadow-lg" style="max-width: 600px; width: 100%;">
+        <div class="card-header bg-primary text-white text-center">
+            <h3 class="mb-0">
+                <i class="bi bi-star-fill me-2"></i>
+                Ihre Meinung ist uns wichtig
+            </h3>
+        </div>
+        <div class="card-body p-4">
+            @if (isLoading)
+            {
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Lädt...</span>
+                    </div>
+                    <p class="mt-3">Umfrage wird geladen...</p>
+                </div>
+            }
+            else if (errorMessage != null)
+            {
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    @errorMessage
+                </div>
+            }
+            else if (isCompleted)
+            {
+                <div class="text-center">
+                    <div class="alert alert-success" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>Vielen Dank!</strong> Ihre Bewertung wurde erfolgreich übermittelt.
+                    </div>
+                    <p class="text-muted">Ihr Feedback hilft uns dabei, unseren Service kontinuierlich zu verbessern.</p>
+                </div>
+            }
+            else if (currentStep == SurveyStep.NpsRating)
+            {
+                <div class="mb-4">
+                    <h5 class="text-center mb-3">Wie wahrscheinlich ist es, dass Sie uns weiterempfehlen würden?</h5>
+                    @if (invitation?.Ticket != null)
+                    {
+                        <div class="alert alert-info">
+                            <strong>Ticket:</strong> @invitation.Ticket.Title
+                        </div>
+                    }
+                </div>
 
+                <div class="nps-scale mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">Gar nicht wahrscheinlich</small>
+                        <small class="text-muted">Sehr wahrscheinlich</small>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        @for (int i = 0; i <= 10; i++)
+                        {
+                            int score = i;
+                            <button type="button" 
+                                    class="btn nps-button @(selectedNpsScore == score ? "selected" : "")"
+                                    @onclick="() => SelectNpsScore(score)">
+                                @score
+                            </button>
+                        }
+                    </div>
+                </div>
 
+                @if (selectedNpsScore.HasValue)
+                {
+                    <div class="text-center">
+                        <button class="btn btn-primary btn-lg" @onclick="SubmitNpsScore" disabled="@isSubmitting">
+                            @if (isSubmitting)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            }
+                            Weiter zu den Folgefragen
+                        </button>
+                    </div>
+                }
+            }
+            else if (currentStep == SurveyStep.FollowUpQuestions)
+            {
+                <div class="mb-4">
+                    <h5 class="text-center mb-3">Zusätzliche Fragen</h5>
+                    <p class="text-muted text-center">Ihre Bewertung: <strong>@selectedNpsScore/10</strong></p>
+                </div>
+
+                @if (isGeneratingQuestions)
+                {
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Fragen werden generiert...</span>
+                        </div>
+                        <p class="mt-3">Personalisierte Fragen werden für Sie erstellt...</p>
+                    </div>
+                }
+                else if (followUpQuestions != null && followUpQuestions.Any())
+                {
+                    <EditForm Model="questionResponses" OnValidSubmit="SubmitFollowUpQuestions">
+                        <DataAnnotationsValidator />
+                        
+                        @for (int i = 0; i < followUpQuestions.Count; i++)
+                        {
+                            int index = i;
+                            var question = followUpQuestions[index];
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">
+                                    @((index + 1)). @question.QuestionText
+                                </label>
+                                <textarea class="form-control" 
+                                         rows="3" 
+                                         placeholder="Ihre Antwort..."
+                                         @bind="questionResponses[index]"
+                                         required></textarea>
+                            </div>
+                        }
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success btn-lg" disabled="@isSubmitting">
+                                @if (isSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                }
+                                Umfrage abschließen
+                            </button>
+                        </div>
+                    </EditForm>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .nps-button {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        border: 2px solid #dee2e6;
+        background-color: white;
+        color: #6c757d;
+        font-weight: bold;
+        transition: all 0.2s ease;
+    }
+
+    .nps-button:hover {
+        border-color: #007bff;
+        background-color: #e7f3ff;
+        transform: scale(1.1);
+    }
+
+    .nps-button.selected {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+
+    @media (max-width: 576px) {
+        .nps-button {
+            width: 35px;
+            height: 35px;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+@code {
+    [Parameter] public string? Token { get; set; }
+
+    private enum SurveyStep
+    {
+        NpsRating,
+        FollowUpQuestions
+    }
+
+    private SurveyStep currentStep = SurveyStep.NpsRating;
+    private SurveyInvitation? invitation;
+    private NpsResponse? npsResponse;
+    private List<FollowUpQuestion>? followUpQuestions;
+    private string[] questionResponses = new string[3];
+    
+    private int? selectedNpsScore;
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+    private bool isGeneratingQuestions = false;
+    private bool isCompleted = false;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(Token))
+            {
+                errorMessage = "Ungültiger Umfrage-Link. Bitte verwenden Sie den Link aus Ihrer E-Mail.";
+                return;
+            }
+
+            if (!Guid.TryParse(Token, out var tokenGuid))
+            {
+                errorMessage = "Ungültiger Umfrage-Link. Bitte verwenden Sie den Link aus Ihrer E-Mail.";
+                return;
+            }
+
+            invitation = await SurveyService.GetSurveyInvitationAsync(tokenGuid);
+            
+            if (invitation == null)
+            {
+                errorMessage = "Diese Umfrage ist nicht mehr verfügbar oder bereits abgelaufen.";
+                return;
+            }
+
+            if (invitation.IsCompleted)
+            {
+                errorMessage = "Diese Umfrage wurde bereits abgeschlossen.";
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading survey invitation");
+            errorMessage = "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void SelectNpsScore(int score)
+    {
+        selectedNpsScore = score;
+    }
+
+    private async Task SubmitNpsScore()
+    {
+        if (!selectedNpsScore.HasValue || invitation == null) return;
+
+        isSubmitting = true;
+        try
+        {
+            npsResponse = await SurveyService.CreateNpsResponseAsync(invitation.InvitationToken, selectedNpsScore.Value);
+            currentStep = SurveyStep.FollowUpQuestions;
+            
+            // Generate follow-up questions
+            isGeneratingQuestions = true;
+            StateHasChanged();
+            
+            followUpQuestions = await SurveyService.GenerateAndSaveFollowUpQuestionsAsync(npsResponse.Id);
+            questionResponses = new string[followUpQuestions.Count];
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error submitting NPS score");
+            errorMessage = "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.";
+        }
+        finally
+        {
+            isSubmitting = false;
+            isGeneratingQuestions = false;
+        }
+    }
+
+    private async Task SubmitFollowUpQuestions()
+    {
+        if (npsResponse == null || followUpQuestions == null) return;
+
+        isSubmitting = true;
+        try
+        {
+            for (int i = 0; i < followUpQuestions.Count; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(questionResponses[i]))
+                {
+                    await SurveyService.SaveQuestionResponseAsync(
+                        npsResponse.Id, 
+                        followUpQuestions[i].Id, 
+                        questionResponses[i]);
+                }
+            }
+
+            await SurveyService.CompleteSurveyAsync(npsResponse.Id);
+            isCompleted = true;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error submitting follow-up questions");
+            errorMessage = "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}
