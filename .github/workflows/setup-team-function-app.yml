@@ -1,0 +1,74 @@
+name: Setup Team Function Apps
+
+on:
+  workflow_dispatch:
+    inputs:
+      teamName:
+        description: "Team Name (IMPORTANT)"
+        default: "team7"
+  workflow_call:
+    inputs:
+      teamName:
+        description: "Team Name (IMPORTANT)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+env:
+  LOC_CORE: westeurope
+
+jobs:
+  setup_team_function_apps:
+    runs-on: ubuntu-22.04
+
+    steps:
+    # Setup
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Azure Login (service-principal)
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # Create team-rg if needed
+    - name: Ensure team RG
+      run: |
+        az group create \
+          --name rg-${{ github.event.inputs.teamName }}-apps \
+          --location $LOC_CORE
+    
+    # Check for team functionApp (name containing teamName)
+    # Set user assigned identity of functionApp to shared-uami (has access to team-kv)
+    # Set keyVaultReferenceIdentity of functionApp to shared-uami --> allows KeyVaultReferences in the functionApp App Settings (EnvVars)
+    - name: Assign UAMI to Azure Function for KV
+      shell: bash
+      run: |
+        TEAM="${{ github.event.inputs.teamName }}"
+        RG="rg-${TEAM}-apps"
+        UAMI_NAME="shared-uami"
+        UAMI_RG="rg-hackathon-shared"
+
+        UAMI_ID=$(az identity show --resource-group $UAMI_RG --name $UAMI_NAME --query id -o tsv)
+
+        FUNC_APPS=$(az functionapp list --resource-group $RG --query "[?contains(name, '$TEAM')].name" -o tsv)
+
+        if [ -z "$FUNC_APPS" ]; then
+          echo "No function apps containing '$TEAM' found in resource group '$RG'. Skipping UAMI assignment."
+        else
+          for FNAPP in $FUNC_APPS; do
+            echo "Processing $FNAPP"
+            CURRENT_KV_REF_ID=$(az functionapp show --name $FNAPP --resource-group $RG --query "keyVaultReferenceIdentity" -o tsv)
+            if [ "$CURRENT_KV_REF_ID" == "$UAMI_ID" ]; then
+              echo "keyVaultReferenceIdentity is already set for $FNAPP. Skipping."
+            else
+              az functionapp identity assign --name $FNAPP --resource-group $RG --identities $UAMI_ID
+              az functionapp update --name $FNAPP --resource-group $RG --set keyVaultReferenceIdentity=$UAMI_ID
+              echo "Set keyVaultReferenceIdentity for $FNAPP."
+            fi
+          done
+        fi

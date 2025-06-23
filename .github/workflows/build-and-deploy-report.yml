@@ -1,0 +1,115 @@
+name: Build & Deploy Reporting-App
+
+on:
+  workflow_dispatch:
+    inputs:
+      teamName:
+        description: "Team Name (IMPORTANT)"
+        default: "team7"
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+env:
+  REGISTRY: ghcr.io
+  LOC_CORE: westeurope
+  LOC_SQL:  northeurope
+
+jobs:
+  build_test_push_and_deploy_report:
+    runs-on: ubuntu-22.04
+
+    steps:
+    # Setup
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 9 SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: "9.0.x"
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    
+    # Build & Test Report App
+    - name: Restore & Build Reporting-App
+      working-directory: src/Reporting-App
+      run: |
+        dotnet restore
+        dotnet build --no-restore --configuration Release
+
+    - name: Run Reporting-Tests
+      working-directory: tests/Reporting-Tests
+      run: dotnet test --verbosity normal
+
+    # Build & Push Report Container App
+    - name: Lower-case the repo owner
+      shell: bash
+      run: echo "OWNER_LOWER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
+    - name: Log in to GHCR
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GHCR_PAT }}
+
+    - name: Build & Push Reporting-App image
+      uses: docker/build-push-action@v6
+      with:
+        context: src/Reporting-App
+        file: src/Reporting-App/Dockerfile
+        push: true
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.OWNER_LOWER }}/reporting-app-${{ github.event.inputs.teamName }}:${{ github.sha }}
+          ${{ env.REGISTRY }}/${{ env.OWNER_LOWER }}/reporting-app-${{ github.event.inputs.teamName }}:${{ github.ref_name || github.head_ref }}
+        build-args: |
+          NUGET_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          USERNAME=${{ github.actor }}
+
+    # Provision Azure Resources
+    - name: Azure Login (service-principal)
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # Create team-rg if needed
+    - name: Ensure team RG
+      run: |
+        az group create \
+          --name rg-${{ github.event.inputs.teamName }}-apps \
+          --location $LOC_CORE
+
+    # deploy report container app
+    - name: Deploy Report Container App
+      env:
+        TEAM:         ${{ github.event.inputs.teamName }}
+        RG_TEAM:      rg-${{ github.event.inputs.teamName }}-apps
+        REGISTRY:     ${{ env.REGISTRY }}
+        OWNER_LOWER:  ${{ env.OWNER_LOWER }}
+        SHA:          ${{ github.sha }}
+      run: |
+        az deployment group create \
+          --resource-group $RG_TEAM \
+          --template-file ./Infrastructure/reporting.bicep \
+          --parameters ./Infrastructure/reporting.bicepparam \
+               teamName=$TEAM \
+               reportingImage=$REGISTRY/$OWNER_LOWER/reporting-app-$TEAM:$SHA \
+               registryUsername=${{ github.actor }} 
+
+  # Execute workflow --> check for team function apps, add shared-uami --> grant access to team kv
+  assign_uami_to_functions:
+    needs: build_test_push_and_deploy_report
+    uses: Kelag-Hackathon/team7/.github/workflows/setup-team-function-app.yml@main
+    with:
+      teamName: ${{ github.event.inputs.teamName }}
+    secrets: inherit
+     
